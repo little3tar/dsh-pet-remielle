@@ -11,6 +11,7 @@ function createHarness(initialCurrent = 'other', autoSelect = true, snapshotItem
   const fetches = []
   const opened = []
   const timers = []
+  let nextTimer = 0
   const styleWrites = []
   let current = initialCurrent
   let sessionListener
@@ -136,8 +137,15 @@ function createHarness(initialCurrent = 'other', autoSelect = true, snapshotItem
     removeEventListener() {},
     setInterval() { return 1 },
     clearInterval() {},
-    setTimeout(listener) { timers.push(listener); return timers.length },
-    clearTimeout() {},
+    setTimeout(listener) {
+      const id = ++nextTimer
+      timers.push({ id, listener, cancelled: false })
+      return id
+    },
+    clearTimeout(id) {
+      const timer = timers.find((entry) => entry.id === id)
+      if (timer) timer.cancelled = true
+    },
     requestAnimationFrame() { return 1 },
     cancelAnimationFrame() {},
     dispatchEvent() {},
@@ -192,7 +200,9 @@ function createHarness(initialCurrent = 'other', autoSelect = true, snapshotItem
   }
   function flushTitleTimers() {
     const queued = timers.splice(0)
-    for (const listener of queued) listener()
+    for (const timer of queued) {
+      if (!timer.cancelled) timer.listener()
+    }
   }
   function dispatchWindowEvent(name) {
     for (const listener of windowListeners.get(name) ?? []) listener({})
@@ -215,9 +225,18 @@ test('generated CSS fixes active and idle heights without margin animation', () 
   const harness = createHarness()
   const css = harness.elements.find((node) => node.tag === 'style' && node.textContent.includes('.rm2-pet-bubbles'))?.textContent
   assert.ok(css, 'missing injected pet CSS')
-  assert.match(css, /height:68px;min-height:68px/)
-  assert.match(css, /idle-placeholder\{height:46px;min-height:46px/)
+  assert.match(css, /height:91px;min-height:91px/)
+  assert.match(css, /idle-placeholder\{height:61px;min-height:61px/)
   assert.doesNotMatch(css, /transition:[^;}]*margin/)
+})
+
+test('bubble containers scale with the configured pet size', () => {
+  const harness = createHarness()
+  harness.send({ ...base, scale: 0.75 })
+  const bubble = harness.elements.find((node) => String(node.className).includes('rm2-pet-bubble') && !String(node.className).includes('rm2-pet-bubbles'))
+  const bubbleStack = harness.elements.find((node) => node.className === 'rm2-pet-bubbles')
+  assert.equal(bubble.style.zoom, '0.75')
+  assert.equal(bubbleStack.style.zoom, '0.75')
 })
 
 test('multi-session deck renders an inert backboard with a dynamic click target', () => {
@@ -249,6 +268,7 @@ test('multi-session deck renders an inert backboard with a dynamic click target'
       sessions[2],
     ],
   })
+  harness.flushTitleTimers()
   assert.equal(backboard.dataset.rm2Tip, '点击去看 dsh-pet-remielle · 审查提示框颜色与溢出问题 哦~')
   // 点击背板：按当帧排序动态解析第 2 名（second）并跳转。
   harness.click(backboard)
@@ -257,6 +277,27 @@ test('multi-session deck renders an inert backboard with a dynamic click target'
   // 先把当前会话复位回 first：上一次跳转已让 second 成为当前会话并占据首层。
   harness.select('first')
   harness.send({ ...base, sessions: [sessions[0], sessions[1], { ...sessions[2], updatedAt: 5 }] })
+  harness.flushTitleTimers()
+  harness.click(backboard)
+  assert.deepEqual(harness.opened, ['second', 'third'])
+})
+
+test('backboard target and tip stay paired while sorting settles', () => {
+  const harness = createHarness('first')
+  const mk = (id, updatedAt, title) => ({ sessionId: id, state: 'WORKING', phase: 'tool-call', message: `${id} 的消息`, title, updatedAt })
+  harness.send({ ...base, sessions: [mk('first', 30, '首个对话'), mk('second', 20, '第二个对话')] })
+  const backboard = harness.elements.find((node) => String(node.className).includes('backboard'))
+  assert.ok(backboard)
+  assert.equal(backboard.dataset.rm2Tip, '点击去看 第二个对话 哦~')
+
+  harness.send({ ...base, sessions: [mk('first', 10, '首个对话'), mk('third', 40, '第三个对话')] })
+  // 新排序先进入防抖，背板提示与点击目标仍保持上一对。
+  assert.equal(backboard.dataset.rm2Tip, '点击去看 第二个对话 哦~')
+  harness.click(backboard)
+  assert.deepEqual(harness.opened, ['second'])
+
+  harness.flushTitleTimers()
+  assert.equal(backboard.dataset.rm2Tip, '点击去看 第三个对话 哦~')
   harness.click(backboard)
   assert.deepEqual(harness.opened, ['second', 'third'])
 })
