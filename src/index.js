@@ -917,7 +917,7 @@ function mount(ctx, config = {}, eventCtx = ctx) {
   void refreshRegistry()
 
   if (typeof ctx.inject === 'function') {
-    ctx.inject(['webServer'], (httpCtx) => {
+    ctx.inject(['webServer', 'connection'], (httpCtx) => {
       const port = httpCtx.webServer.port
 
       // ---- desktop pet window (transparent always-on-top Electron) ----
@@ -932,20 +932,8 @@ function mount(ctx, config = {}, eventCtx = ctx) {
       }
       const origin = `http://127.0.0.1:${port}`
       const desktopUrl = `${origin}${PET_VIEW_ENDPOINT}`
-      // DSH 0.1.2-alpha.1 起 Web 壳根路径要带进程 token；旧宿主没有该方法则仍打开 origin。
-      // 容错：authenticatedUrl 在个别宿主/会话态下可能抛错；失败时回落 origin，
-      // 避免 startDesktop 因此抛异常导致桌面窗根本起不来。
-      const dshWebUrl = () => {
-        try {
-          const connection = ctx.connection
-          return typeof connection?.authenticatedUrl === 'function'
-            ? connection.authenticatedUrl(origin)
-            : origin
-        } catch (error) {
-          logger.warn?.(`dsh-pet-remielle: dshWebUrl() 失败，回落 origin（${String(error)}）`)
-          return origin
-        }
-      }
+      // DSH 0.1.2-alpha.1 起 Web 壳根路径必须通过 connection 带进程 token。
+      const dshWebUrl = () => httpCtx.connection.authenticatedUrl(origin)
       const onDesktopExit = () => {
         desktop = undefined
         if (desktopActive) { desktopActive = false; hub.broadcast() }

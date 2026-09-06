@@ -366,7 +366,7 @@ app.whenReady().then(() => {
   })
 
   // 无网页客户端在线时点击气泡卡：渲染层只发信号，URL 由宿主经 DSH_WEB_URL
-  // 传入（DSH 0.1.2+ 为带进程 token 的根路径；旧宿主为 origin）。
+  // 传入（桌面模式要求 DSH 0.1.2-alpha.1+ 的带进程 token 根路径）。
   // 用 href 而不是 origin：token 在 query 上，303 换 cookie 时也会丢掉其它参数。
   ipcMain.handle('open-dsh-page', () => {
     try {
