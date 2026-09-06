@@ -228,8 +228,13 @@ test('pet-view ships the stacked bubble deck and a single page-switch dot', () =
   assert.match(html, /class="rm2-bubble-dot"/)
   assert.match(html, /SESSION_OPEN_ENDPOINT/)
   assert.doesNotMatch(html, /id="dot1"/)
-  assert.match(html, /height:\s*68px/)
+  assert.match(html, /height:\s*91px/)
   assert.match(html, /idle-placeholder/)
+  assert.match(html, /__tip\.openIdleDshPage\(window\.petBridge\)/)
+  assert.match(html, /BACKBOARD_TIP_DEBOUNCE_MS = 400/)
+  assert.match(html, /__tip\.createBackboardStabilizer\(/)
+  assert.match(html, /bubbleEl\.style\.zoom = String\(scale\)/)
+  assert.match(html, /bubbleStack\.style\.zoom = String\(scale\)/)
   assert.match(html, /clearPulse:\s*true/)
   // SSE 订阅带 ?client=pet：宿主据此把桌宠窗口排除在 session-action 重放计数之外
   // （与 index.js streamClientOf 的约定一致），否则"无网页在线"判定永远不成立。

@@ -18,6 +18,53 @@ test('backboard tip joins workspace and conversation title without brackets', ()
   assert.equal(tip.backboardTipText('', ''), '点击跳到这里看一下~')
 })
 
+test('backboard stabilizer debounces paired target and tip without stale commits', () => {
+  const timers = new Map()
+  let nextTimer = 0
+  const committed = []
+  const schedule = (listener) => {
+    const id = ++nextTimer
+    timers.set(id, listener)
+    return id
+  }
+  const cancel = (id) => timers.delete(id)
+  const flush = () => {
+    const queued = [...timers.values()]
+    timers.clear()
+    for (const listener of queued) listener()
+  }
+  const stabilizer = tip.createBackboardStabilizer(
+    (target, text) => committed.push({ target, text }),
+    400,
+    schedule,
+    cancel,
+  )
+
+  stabilizer.update('A', '提示 A')
+  stabilizer.update('B', '提示 B')
+  stabilizer.update('A', '提示 A')
+  flush()
+  assert.deepEqual(committed, [{ target: 'A', text: '提示 A' }])
+  assert.equal(stabilizer.target(), 'A')
+  assert.equal(stabilizer.tip(), '提示 A')
+
+  stabilizer.update('B', '提示 B')
+  stabilizer.update('C', '提示 C')
+  flush()
+  assert.deepEqual(committed, [
+    { target: 'A', text: '提示 A' },
+    { target: 'C', text: '提示 C' },
+  ])
+})
+
+test('desktop idle action opens DSH only when the bridge exposes it', () => {
+  let calls = 0
+  assert.equal(tip.openIdleDshPage({ openDshPage() { calls += 1 } }), true)
+  assert.equal(calls, 1)
+  assert.equal(tip.openIdleDshPage({}), false)
+  assert.equal(tip.openIdleDshPage(null), false)
+})
+
 test('applyDotTip writes overlay text and clears native title', () => {
   const dot = { dataset: {}, title: '切到余额' }
   const shown = []

@@ -22,6 +22,72 @@
     return '点击去看 ' + parts.join(' · ') + ' 哦~'
   }
 
+  // 让背板的点击目标和提示文字成对更新，并在候选目标稳定后再提交。
+  function createBackboardStabilizer(commit, delay, schedule, cancel) {
+    var currentTarget = ''
+    var currentTip = ''
+    var pendingTarget = ''
+    var pendingTip = ''
+    var timer = 0
+    var commitFn = typeof commit === 'function' ? commit : function () {}
+    var scheduleFn = typeof schedule === 'function' ? schedule : function (fn, ms) { return setTimeout(fn, ms) }
+    var cancelFn = typeof cancel === 'function' ? cancel : function (id) { clearTimeout(id) }
+
+    function clearTimer() {
+      if (!timer) return
+      cancelFn(timer)
+      timer = 0
+    }
+
+    function commitNow(target, tip) {
+      clearTimer()
+      currentTarget = target
+      currentTip = tip
+      pendingTarget = ''
+      pendingTip = ''
+      commitFn(target, tip)
+    }
+
+    function update(target, tip) {
+      target = String(target || '')
+      tip = String(tip || '')
+      if (!target) {
+        commitNow('', '')
+        return
+      }
+      if (target === currentTarget && tip === currentTip) {
+        pendingTarget = ''
+        pendingTip = ''
+        clearTimer()
+        return
+      }
+      if (!currentTarget) {
+        commitNow(target, tip)
+        return
+      }
+      pendingTarget = target
+      pendingTip = tip
+      clearTimer()
+      timer = scheduleFn(function () {
+        timer = 0
+        commitNow(pendingTarget, pendingTip)
+      }, delay)
+    }
+
+    return {
+      update: update,
+      target: function () { return currentTarget },
+      tip: function () { return currentTip },
+      clear: clearTimer,
+    }
+  }
+
+  function openIdleDshPage(bridge) {
+    if (!bridge || typeof bridge.openDshPage !== 'function') return false
+    bridge.openDshPage()
+    return true
+  }
+
   function applyDotTip(dot, page, anchor, show) {
     if (!dot || !dot.dataset) return
     dot.dataset.rm2Tip = dotTipText(page)
@@ -102,6 +168,8 @@
   global.__rm2PetTip = {
     dotTipText: dotTipText,
     backboardTipText: backboardTipText,
+    createBackboardStabilizer: createBackboardStabilizer,
+    openIdleDshPage: openIdleDshPage,
     applyDotTip: applyDotTip,
     onDotLeave: onDotLeave,
     layoutPetTip: layoutPetTip,

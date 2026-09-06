@@ -38,9 +38,9 @@
   }
   .rm2-pet-bubbles {
     position: relative;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     width: fit-content;
-    max-width: min(330px, calc(100vw - 24px));
+    max-width: min(440px, calc(100vw - 24px));
     display: none;
     flex-direction: column;
     align-items: center;
@@ -50,16 +50,16 @@
   .rm2-pet-bubble {
     display: none;
     position: relative;
-    margin-bottom: 10px;
+    margin-bottom: 13px;
     box-sizing: border-box;
-    min-width: 150px;
-    max-width: min(330px, calc(100vw - 24px));
-    padding: 12px 20px 12px 30px;
-    border-radius: 22px;
+    min-width: 200px;
+    max-width: min(440px, calc(100vw - 24px));
+    padding: 16px 27px 16px 40px;
+    border-radius: 29px;
     background: #fff0f5;
     border: 1px solid rgba(240, 120, 160, .45);
     box-shadow: var(--rm2-glow);
-    font-size: 12px;
+    font-size: 16px;
     line-height: 1.45;
     text-align: left;
     white-space: nowrap;
@@ -68,8 +68,8 @@
   .rm2-pet-bubbles .rm2-pet-bubble {
     margin: 0;
     width: fit-content;
-    height: 68px;
-    min-height: 68px;
+    height: 91px;
+    min-height: 91px;
     box-shadow: var(--rm2-glow);
     pointer-events: auto;
     cursor: pointer;
@@ -77,7 +77,7 @@
     transition: width .18s ease, opacity .18s ease;
   }
   .rm2-pet-bubble-title { font-weight: 600; color: #b03a60; min-width: 0; flex: none; white-space: nowrap; overflow: visible; text-overflow: clip; line-height: 1.35; }
-  .rm2-pet-bubble-detail { color: #c2607f; margin-top: 2px; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .rm2-pet-bubble-detail { color: #c2607f; margin-top: 3px; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   /* 自绘悬停提示浮层：原生 title 不吃 setZoomFactor，高缩放屏（如 200%）上文字过小。
      阴影与菜单同套，不用网页 8/24。 */
   .rm2-pet-tip {
@@ -97,13 +97,13 @@
   @media (prefers-color-scheme: dark) {
     .rm2-pet-tip { background: #48142a; border-color: rgba(255, 150, 185, .42); color: #ffd6e4; }
   }
-  .rm2-pet-bubble-header { display: flex; align-items: center; min-width: 0; min-height: 22px; }
+  .rm2-pet-bubble-header { display: flex; align-items: center; min-width: 0; min-height: 29px; }
   .rm2-pet-bubble.title-clipped .rm2-pet-bubble-title { flex: 1; overflow: hidden; text-overflow: ellipsis; }
-  .rm2-pet-bubble-action { display: inline-flex; flex: none; order: 2; align-items: center; justify-content: center; width: 22px; height: 22px; margin-left: 8px; margin-right: 0; border-radius: 50%; background: #e8508a; color: #fff; font-size: 15px; font-weight: 700; line-height: 1; }
-  .rm2-pet-bubble-action img { width: 15px; height: 15px; display: block; filter: brightness(0) saturate(100%) invert(1); }
-  .rm2-pet-bubble-completion { display: none; flex: none; width: 12px; height: 12px; margin-right: 10px; border-radius: 50%; background: #35c979; box-shadow: 0 0 0 3px rgba(53,201,121,.18); }
+  .rm2-pet-bubble-action { display: inline-flex; flex: none; order: 2; align-items: center; justify-content: center; width: 29px; height: 29px; margin-left: 11px; margin-right: 0; border-radius: 50%; background: #e8508a; color: #fff; font-size: 20px; font-weight: 700; line-height: 1; }
+  .rm2-pet-bubble-action img { width: 20px; height: 20px; display: block; filter: brightness(0) saturate(100%) invert(1); }
+  .rm2-pet-bubble-completion { display: none; flex: none; width: 16px; height: 16px; margin-right: 13px; border-radius: 50%; background: #35c979; box-shadow: 0 0 0 4px rgba(53,201,121,.18); }
   .rm2-pet-bubble.completed .rm2-pet-bubble-completion { display: inline-flex; }
-  .rm2-pet-bubble.idle-placeholder { height: 46px; min-height: 46px; padding-top: 11px; padding-bottom: 11px; }
+  .rm2-pet-bubble.idle-placeholder { height: 61px; min-height: 61px; padding-top: 15px; padding-bottom: 15px; }
   .rm2-pet-bubble-stack-count { display: none; position: absolute; right: 16px; bottom: 0; height: 8px; align-items: center; color: #f0a8c0; font-size: 9px; font-weight: 700; line-height: 8px; }
   .rm2-pet-bubble.summary-backboard .rm2-pet-bubble-stack-count { display: flex; }
   .rm2-pet-bubbles .rm2-pet-bubble:not(.top) .rm2-pet-bubble-title,
@@ -116,8 +116,8 @@
   .rm2-bubble-dots { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; pointer-events: auto; z-index: 120; }
   .rm2-bubble-dot { width: 10px; height: 10px; border-radius: 50%; background: #e8508a; cursor: pointer; box-shadow: 0 0 0 2px rgba(255,255,255,.65); transition: transform .18s, background .18s; }
   .rm2-bubble-dot:hover { transform: scale(1.25); }
-  .rm2-bubble-balance { box-sizing: border-box; height: 68px; min-height: 68px; max-width: 330px; }
-  .rm2-bubble-balance .rm2-pet-bubble-title { line-height: 22px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .rm2-bubble-balance { box-sizing: border-box; height: 91px; min-height: 91px; max-width: 440px; }
+  .rm2-bubble-balance .rm2-pet-bubble-title { line-height: 29px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   img { width: 180px; height: auto; display: block; }
   /* 审批未送达 toast：单例提示条，悬在气泡堆叠上方（bottom 由 JS 按堆叠实时计算）；
      pointer-events 放行桌面点击，z-index 低于右键菜单（#menu:999） */
@@ -217,10 +217,10 @@
   var balanceRequested = false
   var SESSION_OPEN_ENDPOINT = '/plugins/dsh-pet-remielle/session/open'
   var COMPLETION_ACK_ENDPOINT = '/plugins/dsh-pet-remielle/completion/ack'
-  var BUBBLE_MIN_W = 208
+  var BUBBLE_MIN_W = 277
   // 牌叠第二层假背板的固定 sessionId（不对应真实会话，仅承载 +N 与点击跳转）。
   var BUBBLE_BACKBOARD_ID = '__pet_backboard__'
-  var backboardTarget = ''
+  var BACKBOARD_TIP_DEBOUNCE_MS = 400
   // 当前会话完成卡的自动 ack 标记（sessionId -> true）：见 updateBubbles 内说明
   var autoAckedCompletions = new Map()
   var currentSessionId = undefined
@@ -279,6 +279,19 @@
   function onDotLeave(e) {
     __tip.onDotLeave(e, bubbleDot, bubbleDots, showPetTip, hidePetTip)
   }
+  function commitBackboardTarget(target, tip) {
+    var el = bubbleEls.get(BUBBLE_BACKBOARD_ID)
+    if (el && el.node) {
+      el.node.dataset.rm2Tip = tip
+      if (petTipAnchor === el.node) showPetTip(el.node)
+    }
+  }
+  var backboardStabilizer = __tip.createBackboardStabilizer(
+    commitBackboardTarget,
+    BACKBOARD_TIP_DEBOUNCE_MS,
+    function (fn, ms) { return window.setTimeout(fn, ms) },
+    function (timer) { window.clearTimeout(timer) },
+  )
   var __petMeasureEl = null
   function ensureMeasureEl() {
     if (!__petMeasureEl) {
@@ -302,7 +315,7 @@
   }
   function bubbleRowWidth(textW) {
     var vw = Math.max(150, (window.innerWidth || 1280) - 24)
-    return Math.min(330, vw, Math.max(BUBBLE_MIN_W, textW + 50))
+    return Math.min(440, vw, Math.max(BUBBLE_MIN_W, textW + 67))
   }
   function switchBubblePage(p) {
     currentBubblePage = p
@@ -878,13 +891,16 @@
     var activate = function (event) {
       event.preventDefault()
       event.stopPropagation()
-      // 与网页端一致（src/client.core.js activate）：占位卡不可交互，
-      // 否则点击「待机中」会以 __pet_idle__ 广播打开不存在的会话，
-      // 无网页在线时还会误触 openDshPage 弹出浏览器。
-      if (el.node.dataset.idlePlaceholder === 'true') return
+      // 桌面端空闲占位卡单击打开带 token 的 DSH 根页面，
+      // 不把 __pet_idle__ 当作真实会话发送给宿主。
+      if (el.node.dataset.idlePlaceholder === 'true') {
+        __tip.openIdleDshPage(window.petBridge)
+        return
+      }
       // 假背板：点击时按当帧排序动态解析第 2 名会话并跳转。
       if (el.targetSessionId === BUBBLE_BACKBOARD_ID) {
-        if (backboardTarget) requestSessionOpen(backboardTarget, false)
+        var target = backboardStabilizer.target()
+        if (target) requestSessionOpen(target, false)
         return
       }
       requestSessionOpen(el.targetSessionId, el.completed)
@@ -1023,7 +1039,7 @@
     // 是 0.3.4 桌面点卡片不跳转时代的遗留，与 title 提示和实际行为矛盾。
     el.node.style.cursor = entry.idlePlaceholder ? 'default' : 'pointer'
     el.node.dataset.idlePlaceholder = entry.idlePlaceholder ? 'true' : 'false'
-    // 占位卡不可交互（activate 有守卫），提示不能落进「点击跳转」兜底文案。
+    // 空闲占位卡不显示会话跳转提示；桌面端单击行为在 activate 中单独处理。
     // 审批卡悬停用第二行全文（工作区 · preview）：气泡宽度会 CSS 省略，自绘
     // 浮层才能读到请求内容；原生 title 不随 zoom 缩放已废弃；操作说明在勾号
     // aria-label 里。title 置空避免与自绘浮层双重提示。
@@ -1087,6 +1103,10 @@
     // 点击背板时按当帧排序动态解析第 2 名并跳转，这里只需记住它是谁。
     var visibleEntries = ordered.slice(0, 1)
     if (ordered.length > 1) {
+      backboardStabilizer.update(
+        targetSessionOf(ordered[1]) || '',
+        __tip.backboardTipText(ordered[1].project, ordered[1].title),
+      )
       visibleEntries.push({
         sessionId: BUBBLE_BACKBOARD_ID,
         state: 'IDLE',
@@ -1096,11 +1116,10 @@
         updatedAt: 0,
         backboard: true,
         summaryCount: ordered.length - 1,
-        backboardTip: __tip.backboardTipText(ordered[1].project, ordered[1].title),
+        backboardTip: backboardStabilizer.tip(),
       })
-      backboardTarget = targetSessionOf(ordered[1]) || ''
     } else {
-      backboardTarget = ''
+      backboardStabilizer.update('', '')
     }
     var count = visibleEntries.length
     var seen = new Set()
@@ -1112,13 +1131,13 @@
       var stackedEl = ensureBubbleEl(entry.sessionId)
       if (stackedEl.node.parentNode !== bubbleStack) bubbleStack.appendChild(stackedEl.node)
       renderBubble(stackedEl, entry, i)
-      stackedEl.node.style.minWidth = '150px'
+      stackedEl.node.style.minWidth = '200px'
       stackedEl.node.style.width = 'max-content'
       stackedEl.node.style.maxWidth = 'none'
       stackedEl.node.classList.remove('title-clipped')
       var titleWidth = stackedEl.title.scrollWidth || stackedEl.title.offsetWidth || 0
-      var actionWidth = 30
-      var completionWidth = completionOf(entry) ? 22 : 0
+      var actionWidth = 40
+      var completionWidth = completionOf(entry) ? 29 : 0
       stackedEl.naturalHeaderWidth = titleWidth + actionWidth + completionWidth
       var detailW = stackedEl.detail.scrollWidth || stackedEl.detail.offsetWidth || 0
       if (i === 0) measuredWidth = Math.max(stackedEl.naturalHeaderWidth, detailW)
@@ -1132,7 +1151,7 @@
       var renderEntry = visibleEntries[j]
       var renderEl = bubbleEls.get(renderEntry.sessionId)
       renderBubble(renderEl, renderEntry, j)
-      renderEl.node.classList.toggle('title-clipped', renderEl.naturalHeaderWidth > Math.max(0, deckWidth - 50))
+      renderEl.node.classList.toggle('title-clipped', renderEl.naturalHeaderWidth > Math.max(0, deckWidth - 67))
     }
     for (var key of bubbleEls.keys()) {
       if (!seen.has(key)) {
@@ -1153,6 +1172,8 @@
   function applyTransform(mood, snapshot) {
     var scale = snapshot.scale || 1
     imgEl.style.width = Math.round(180 * scale) + 'px'
+    bubbleEl.style.zoom = String(scale)
+    bubbleStack.style.zoom = String(scale)
     imgEl.style.transform = ''
   }
 
