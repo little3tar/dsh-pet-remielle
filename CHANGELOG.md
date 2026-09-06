@@ -1,13 +1,23 @@
 # Changelog
 
-## [Unreleased]
+## [0.4.0] — 2026-09-06
+
+⚠️ 本版本起桌面模式要求 DSH `>= 0.1.2-alpha.1`（0.1.2-rc.1 已发 npm latest）。
 
 ### Features
-- Linux 适配：插件不再仅限 Windows（`os` 增加 `linux`、`cpu` 增加 `arm64`）。桌面浮窗运行时改为按平台/架构解析（vendor 目录、二进制名、zip 名、跨平台解压），Electron 缺失时仍回落页面内宠物；桌面窗 DPI 注册表读取仅在 Windows 生效，其它平台回退 Electron screen API。
+- macOS / Linux 适配：插件不再仅限 Windows（`os` 增加 `darwin`/`linux`、`cpu` 增加 `arm64`）。桌面浮窗运行时按平台/架构解析（vendor 目录、二进制名、zip 名），解压按平台分叉：macOS 直接解压进 vendor（保留 `.app` 符号链接），win32/linux 走临时目录 `moveContents` 上移；Electron 缺失时仍回落页面内宠物；桌面窗 DPI 注册表读取仅在 Windows 生效，其它平台回退 Electron screen API。
+- 气泡缩放设置项（外观页）：「消息气泡随桌宠同步缩放」开关（默认开）——勾选时显示「气泡相对桌宠的大小」比例滑条，不勾选时显示「气泡固定大小」；缩放口径由网页端与桌面端共用的 `bubbleZoomOf` 统一，缺字段回落旧口径（气泡 zoom = 角色大小）。
+- 桌面模式空闲气泡单击直接打开 DSH 网页（`__pet_idle__` 不再被当作真实会话发送 `/session/open`）。
+
+### Changes
+- 设置面板「更新/反馈」合并为「关于」标签页（5 → 4），版本号只展示一次，反馈入口移入关于页底部。
 
 ### Fixes
-- 桌面离线打开 DSH 网页：通过 `ctx.connection.authenticatedUrl` 带上 0.1.2 进程 token；桌面模式要求 DSH `>= 0.1.2-alpha.1`。
+- 桌面离线打开 DSH 网页：通过 `ctx.connection.authenticatedUrl` 带上 0.1.2 进程 token；桌面模式要求 DSH `>= 0.1.2-alpha.1`（`connection` 作为必需服务注入，移除旧宿主的 origin 回退，避免新宿主上静默打开必然 401 的页面）。
+- 桌面窗退出通知去重：启动失败 / `error` / `exit` 收敛为一次性 `onExit`，不再重复广播桌面状态。
+- 牌叠第二层背板的目标与提示文字成对 trailing debounce（400ms）：候选目标变化即重置计时，A→B→A 不再提交过期目标，消除"提示显示 A、点击打开 B"。
 - fnOS/TRIM gateway 前缀路由（`/app/<id>/`）支持：dsh web 挂载在前缀下时，宿主桥接只改写 HTML 静态 `src`/`fetch`/`EventSource`/`<script src>`，运行时 JS 赋值的 `img.src`（贴纸、双击画画 pics、气泡卡 favicon）不被改写，请求落到 NAS 根路径 404 → 宠物贴图消失（只剩文字气泡）、气泡吞掉 pointer 事件导致拖不动。现从本 bundle 的 `<script>` 加载路径检测前缀（回退页面 path），所有运行时绝对路径带前缀；直连模式（无前缀）行为不变。
+- 桌面窗运行时解析在 linux-arm64 上误用 `linux-x64` 包名/目录的问题（`runtimeTarget` arch 感知）。
 
 ## [0.3.6] — 2026-08-22
 
