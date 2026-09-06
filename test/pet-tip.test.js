@@ -65,6 +65,33 @@ test('desktop idle action opens DSH only when the bridge exposes it', () => {
   assert.equal(tip.openIdleDshPage(null), false)
 })
 
+test('bubbleZoomOf sync mode multiplies pet scale by relative ratio', () => {
+  // 默认（字段缺失）回落旧口径 zoom = scale，与 0.3.6 行为一致
+  assert.equal(tip.bubbleZoomOf({ scale: 1.2 }), 1.2)
+  assert.equal(tip.bubbleZoomOf({ scale: 1.5, bubbleScaleRatio: 1 }), 1.5)
+  assert.equal(tip.bubbleZoomOf({ scale: 1.5, bubbleScaleRatio: 0.8 }), 1.2)
+  assert.equal(tip.bubbleZoomOf({ scale: 0.5, bubbleScaleRatio: 2 }), 1)
+  // 显式同步开关（true）与缺失等价
+  assert.equal(tip.bubbleZoomOf({ scale: 1.5, bubbleScaleSync: true, bubbleScaleRatio: 0.8 }), 1.2)
+})
+
+test('bubbleZoomOf fixed mode ignores pet scale', () => {
+  assert.equal(tip.bubbleZoomOf({ scale: 1.8, bubbleScaleSync: false, bubbleFixedSize: 0.8 }), 0.8)
+  assert.equal(tip.bubbleZoomOf({ scale: 0.5, bubbleScaleSync: false, bubbleFixedSize: 1.5 }), 1.5)
+  // 固定模式缺 fixed 字段回落 1（基准大小），不偷用 scale
+  assert.equal(tip.bubbleZoomOf({ scale: 1.8, bubbleScaleSync: false }), 1)
+})
+
+test('bubbleZoomOf clamps and tolerates malformed snapshots', () => {
+  assert.equal(tip.bubbleZoomOf(null), 1)
+  assert.equal(tip.bubbleZoomOf({}), 1)
+  assert.equal(tip.bubbleZoomOf({ scale: 'abc' }), 1)
+  assert.equal(tip.bubbleZoomOf({ scale: 2, bubbleScaleRatio: 2 }), 3) // 4 → 钳到上限 3
+  assert.equal(tip.bubbleZoomOf({ scale: 0.5, bubbleScaleRatio: 0.5 }), 0.3) // 0.25 → 钳到下限 0.3
+  assert.equal(tip.bubbleZoomOf({ scale: 1, bubbleScaleSync: false, bubbleFixedSize: 99 }), 3)
+  assert.equal(tip.bubbleZoomOf({ scale: 1, bubbleScaleSync: false, bubbleFixedSize: 'x' }), 1)
+})
+
 test('applyDotTip writes overlay text and clears native title', () => {
   const dot = { dataset: {}, title: '切到余额' }
   const shown = []

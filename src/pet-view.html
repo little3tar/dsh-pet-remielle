@@ -1172,8 +1172,10 @@
   function applyTransform(mood, snapshot) {
     var scale = snapshot.scale || 1
     imgEl.style.width = Math.round(180 * scale) + 'px'
-    bubbleEl.style.zoom = String(scale)
-    bubbleStack.style.zoom = String(scale)
+    // 气泡缩放口径与网页端共用 pet-tip.cjs 的 bubbleZoomOf（同步/固定两模式）
+    var bubbleZoom = __tip.bubbleZoomOf(snapshot)
+    bubbleEl.style.zoom = String(bubbleZoom)
+    bubbleStack.style.zoom = String(bubbleZoom)
     imgEl.style.transform = ''
   }
 

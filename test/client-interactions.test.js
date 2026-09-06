@@ -239,6 +239,20 @@ test('bubble containers scale with the configured pet size', () => {
   assert.equal(bubbleStack.style.zoom, '0.75')
 })
 
+test('bubble zoom follows sync-ratio or fixed-size mode from the snapshot', () => {
+  // 同步模式：zoom = scale × bubbleScaleRatio
+  const syncHarness = createHarness()
+  syncHarness.send({ ...base, scale: 1.5, bubbleScaleSync: true, bubbleScaleRatio: 0.8 })
+  const syncStack = syncHarness.elements.find((node) => node.className === 'rm2-pet-bubbles')
+  assert.equal(syncStack.style.zoom, '1.2')
+
+  // 固定模式：zoom = bubbleFixedSize，与桌宠 scale 无关
+  const fixedHarness = createHarness()
+  fixedHarness.send({ ...base, scale: 1.5, bubbleScaleSync: false, bubbleFixedSize: 0.8 })
+  const fixedStack = fixedHarness.elements.find((node) => node.className === 'rm2-pet-bubbles')
+  assert.equal(fixedStack.style.zoom, '0.8')
+})
+
 test('multi-session deck renders an inert backboard with a dynamic click target', () => {
   const harness = createHarness('first')
   const sessions = [

@@ -70,6 +70,9 @@ const petEntry = Schema.object({
 export const Config = Schema.object({
   enabled: Schema.boolean().default(true).description('启用桌宠'),
   scale: Schema.number().min(0.5).max(2).step(0.05).default(1).role('slider').description('角色大小'),
+  bubbleScaleSync: Schema.boolean().default(true).description('消息气泡随桌宠同步缩放（关闭后气泡使用固定大小）'),
+  bubbleScaleRatio: Schema.number().min(0.5).max(2).step(0.05).default(1).description('气泡相对桌宠的大小（同步缩放时生效，1 = 与桌宠等比）'),
+  bubbleFixedSize: Schema.number().min(0.5).max(2).step(0.05).default(1).description('气泡固定大小（不随桌宠同步缩放时生效，1 = 基准大小）'),
   opacity: Schema.number().min(0.3).max(1).step(0.05).default(1).role('slider').description('透明度'),
   locked: Schema.boolean().default(false).description('锁定位置（禁止拖动）'),
   paused: Schema.boolean().default(false).description('暂停动画'),
@@ -90,6 +93,9 @@ export const Config = Schema.object({
 const defaults = Object.freeze({
   enabled: true,
   scale: 1,
+  bubbleScaleSync: true,
+  bubbleScaleRatio: 1,
+  bubbleFixedSize: 1,
   opacity: 1,
   locked: false,
   paused: false,
@@ -111,6 +117,9 @@ function publicConfig(config = {}) {
   return {
     enabled: config.enabled ?? defaults.enabled,
     scale: config.scale ?? defaults.scale,
+    bubbleScaleSync: config.bubbleScaleSync ?? defaults.bubbleScaleSync,
+    bubbleScaleRatio: config.bubbleScaleRatio ?? defaults.bubbleScaleRatio,
+    bubbleFixedSize: config.bubbleFixedSize ?? defaults.bubbleFixedSize,
     opacity: config.opacity ?? defaults.opacity,
     locked: config.locked ?? defaults.locked,
     paused: config.paused ?? defaults.paused,
@@ -180,7 +189,7 @@ async function readJsonBody(req) {
 }
 
 export function createConfigHandler(settings) {
-  const allowed = new Set(['enabled', 'scale', 'opacity', 'locked', 'paused', 'hidden', 'includeSubagents', 'showBubble', 'showBubbleStatus', 'showBubbleUsage', 'usageMode', 'platformToken', 'desktopMode', 'posX', 'posY'])
+  const allowed = new Set(['enabled', 'scale', 'bubbleScaleSync', 'bubbleScaleRatio', 'bubbleFixedSize', 'opacity', 'locked', 'paused', 'hidden', 'includeSubagents', 'showBubble', 'showBubbleStatus', 'showBubbleUsage', 'usageMode', 'platformToken', 'desktopMode', 'posX', 'posY'])
   return async (req, res) => {
     if (!localOnly(req, res)) return
     if (req.method === 'GET') {
@@ -542,6 +551,9 @@ export function createStateSnapshot({ getLatest, getPulse, getConfig, getPetId, 
       ok: true,
       enabled: config.enabled === true,
       scale: config.scale,
+      bubbleScaleSync: config.bubbleScaleSync !== false,
+      bubbleScaleRatio: config.bubbleScaleRatio,
+      bubbleFixedSize: config.bubbleFixedSize,
       opacity: config.opacity,
       locked: config.locked === true,
       bubble: config.showBubble !== false,

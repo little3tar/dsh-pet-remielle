@@ -718,8 +718,7 @@ function PetsSection() {
     { id: 'appearance', label: '外观' },
     { id: 'behavior', label: '行为' },
     { id: 'desktop', label: '桌面悬浮' },
-    { id: 'update', label: '更新' },
-    { id: 'feedback', label: '反馈' },
+    { id: 'about', label: '关于' },
   ]
   var tabBar = React.createElement('div', { style: { display: 'flex', gap: 2, borderBottom: '1px solid var(--border-color, #d8d8d8)', marginBottom: 12 } },
     tabs.map(function (t) {
@@ -737,10 +736,22 @@ function PetsSection() {
     }),
   )
   var v = config || {}
+  // 子设置项：随父开关缩进，表达从属关系（不用强调边框，纯留白缩进）
+  var subFieldStyle = { marginLeft: 18, paddingLeft: 12 }
   var appearanceTab = React.createElement('div', null,
     React.createElement(Field, { label: '角色大小', hint: Math.round((v.scale ?? 1) * 100) + '%' },
       React.createElement('input', { type: 'range', min: 0.5, max: 2, step: 0.05, value: v.scale ?? 1, disabled: !config, onChange: function (e) { writeSlider('scale', Number(e.target.value)) } }),
     ),
+    React.createElement(Field, { label: '气泡随桌宠同步缩放', hint: v.bubbleScaleSync !== false ? '气泡大小 = 角色大小 × 相对比例' : '气泡使用固定大小，不随角色缩放' },
+      React.createElement(Switch, { checked: v.bubbleScaleSync !== false, disabled: !config, onChange: function (val) { write('bubbleScaleSync', val) } }),
+    ),
+    v.bubbleScaleSync !== false
+      ? React.createElement(Field, { label: '气泡相对桌宠的大小', hint: Math.round((v.bubbleScaleRatio ?? 1) * 100) + '%', fieldStyle: subFieldStyle },
+          React.createElement('input', { type: 'range', min: 0.5, max: 2, step: 0.05, value: v.bubbleScaleRatio ?? 1, disabled: !config, onChange: function (e) { writeSlider('bubbleScaleRatio', Number(e.target.value)) } }),
+        )
+      : React.createElement(Field, { label: '气泡固定大小', hint: Math.round((v.bubbleFixedSize ?? 1) * 100) + '%', fieldStyle: subFieldStyle },
+          React.createElement('input', { type: 'range', min: 0.5, max: 2, step: 0.05, value: v.bubbleFixedSize ?? 1, disabled: !config, onChange: function (e) { writeSlider('bubbleFixedSize', Number(e.target.value)) } }),
+        ),
     React.createElement(Field, { label: '透明度', hint: Math.round((v.opacity ?? 1) * 100) + '%' },
       React.createElement('input', { type: 'range', min: 0.3, max: 1, step: 0.05, value: v.opacity ?? 1, disabled: !config, onChange: function (e) { writeSlider('opacity', Number(e.target.value)) } }),
     ),
@@ -901,7 +912,7 @@ function PetsSection() {
       ? React.createElement('p', { style: { margin: '8px 0 0', opacity: 0.6, fontSize: 12 } }, '桌面窗口支持拖动、滚轮缩放、双击画画。关闭后回到页面内展示。')
       : null,
   )
-  var updateTab = React.createElement('div', null,
+  var aboutTab = React.createElement('div', null,
     React.createElement('p', { style: { margin: '0 0 12px', opacity: 0.7 } }, '检查是否有新版本可用，或执行增量更新。'),
     React.createElement('div', { style: { display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' } },
       React.createElement('span', { style: { fontSize: 13 } }, '当前版本：'),
@@ -955,24 +966,27 @@ function PetsSection() {
       : null,
     React.createElement('p', { style: { margin: '14px 0 0', opacity: 0.5, fontSize: 12 } },
       '更新检查通过 GitHub API 获取最新版本；桌面悬浮窗等运行时随插件一同更新。更新完成后需重启 DSH 生效。'),
-  )
-  var feedbackTab = React.createElement('div', null,
-    React.createElement('p', { style: { margin: '0 0 12px', opacity: 0.7 } }, '遇到问题或有建议？欢迎反馈，帮助改善桌宠。'),
-    React.createElement('p', { style: { margin: '0 0 12px', opacity: 0.6, fontSize: 12 } }, '桌宠版本：' + (typeof RM_PLUGIN_VERSION !== 'undefined' ? RM_PLUGIN_VERSION : 'unknown')),
-    React.createElement('div', { style: { display: 'flex', gap: 8, flexWrap: 'wrap' } },
-      React.createElement('button', {
-        type: 'button',
-        style: { padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border-color, #d8d8d8)', background: 'transparent', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' },
-        onClick: function () { window.open('https://github.com/Gin-7/dsh-pet-remielle/issues/new?template=bug_report.yml', '_blank') },
-      }, '提交 Bug'),
-      React.createElement('button', {
-        type: 'button',
-        style: { padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border-color, #d8d8d8)', background: 'transparent', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' },
-        onClick: function () { window.open('https://github.com/Gin-7/dsh-pet-remielle/issues/new?template=feature_request.yml', '_blank') },
-      }, '功能建议'),
+    // 反馈区（原独立"反馈"标签页并入"关于"）；版本号已在上方展示，不再重复
+    React.createElement('div', { style: { marginTop: 16, paddingTop: 12, borderTop: '1px solid var(--border-color, rgba(0,0,0,.06))' } },
+      React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 } },
+        React.createElement('span', { style: { fontWeight: 600 } }, '反馈'),
+        React.createElement('span', { style: { fontSize: 12, opacity: 0.6 } }, '遇到问题或有建议？'),
+      ),
+      React.createElement('div', { style: { display: 'flex', gap: 8, flexWrap: 'wrap' } },
+        React.createElement('button', {
+          type: 'button',
+          style: { padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border-color, #d8d8d8)', background: 'transparent', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' },
+          onClick: function () { window.open('https://github.com/Gin-7/dsh-pet-remielle/issues/new?template=bug_report.yml', '_blank') },
+        }, '提交 Bug'),
+        React.createElement('button', {
+          type: 'button',
+          style: { padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border-color, #d8d8d8)', background: 'transparent', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' },
+          onClick: function () { window.open('https://github.com/Gin-7/dsh-pet-remielle/issues/new?template=feature_request.yml', '_blank') },
+        }, '功能建议'),
+      ),
     ),
   )
-  var tabContent = tab === 'appearance' ? appearanceTab : tab === 'behavior' ? behaviorTab : tab === 'desktop' ? desktopTab : tab === 'update' ? updateTab : feedbackTab
+  var tabContent = tab === 'appearance' ? appearanceTab : tab === 'behavior' ? behaviorTab : tab === 'desktop' ? desktopTab : aboutTab
   return React.createElement('section', { style: sectionStyle, 'data-testid': 'dsh-pet-remielle-pets-section' },
     React.createElement('h3', { style: { margin: 0, fontSize: 15 } }, '桌宠设置'),
     tabBar,
@@ -1289,8 +1303,10 @@ function mountPet(ctx) {
     var scale = snapshot.scale ?? 1
     var opacity = snapshot.opacity ?? 1
     img.style.width = Math.round(180 * scale) + 'px'
-    bubble.style.zoom = String(scale)
-    bubbleStack.style.zoom = String(scale)
+    // 气泡缩放口径与桌面端共用 pet-tip.cjs 的 bubbleZoomOf（同步/固定两模式）
+    var bubbleZoom = __tip.bubbleZoomOf(snapshot)
+    bubble.style.zoom = String(bubbleZoom)
+    bubbleStack.style.zoom = String(bubbleZoom)
     img.style.opacity = String(opacity)
     lockedNow = snapshot.locked === true
     syncPetCursor()

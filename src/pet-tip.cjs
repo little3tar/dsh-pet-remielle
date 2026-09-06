@@ -1,5 +1,6 @@
 /**
- * Shared page-switch-dot hover copy, leave routing, and tip layout clamp.
+ * Shared page-switch-dot hover copy, leave routing, tip layout clamp, and
+ * bubble zoom resolution.
  * Web: inlined by scripts/build-client.mjs ahead of client.core.js.
  * Desktop: served at /plugins/dsh-pet-remielle/pet-tip.js.
  *
@@ -88,6 +89,33 @@
     return true
   }
 
+  // ---- 气泡缩放口径（网页端与桌面端共用，防两端口径漂移）----
+  // 同步模式（bubbleScaleSync !== false）：气泡 zoom = 桌宠 scale × 相对比例；
+  // 固定模式（bubbleScaleSync === false）：气泡 zoom = 固定大小系数。
+  // 字段缺失时回落旧口径（zoom = scale），与 0.3.6 及之前行为一致。
+  var BUBBLE_ZOOM_MIN = 0.3
+  var BUBBLE_ZOOM_MAX = 3
+
+  function clampZoom(value) {
+    if (!isFinite(value) || value <= 0) return 1
+    // 4 位小数内取整：scale/ratio 步进 0.05，乘积最多 4 位小数，
+    // 同时消掉 1.5×0.8=1.2000000000000002 这类浮点噪声。
+    var clamped = Math.min(BUBBLE_ZOOM_MAX, Math.max(BUBBLE_ZOOM_MIN, value))
+    return Math.round(clamped * 1e4) / 1e4
+  }
+
+  function bubbleZoomOf(snapshot) {
+    if (!snapshot) return 1
+    var scale = Number(snapshot.scale)
+    if (!isFinite(scale) || scale <= 0) scale = 1
+    if (snapshot.bubbleScaleSync === false) {
+      var fixed = Number(snapshot.bubbleFixedSize)
+      return clampZoom(isFinite(fixed) && fixed > 0 ? fixed : 1)
+    }
+    var ratio = Number(snapshot.bubbleScaleRatio)
+    return clampZoom(scale * (isFinite(ratio) && ratio > 0 ? ratio : 1))
+  }
+
   function applyDotTip(dot, page, anchor, show) {
     if (!dot || !dot.dataset) return
     dot.dataset.rm2Tip = dotTipText(page)
@@ -170,6 +198,7 @@
     backboardTipText: backboardTipText,
     createBackboardStabilizer: createBackboardStabilizer,
     openIdleDshPage: openIdleDshPage,
+    bubbleZoomOf: bubbleZoomOf,
     applyDotTip: applyDotTip,
     onDotLeave: onDotLeave,
     layoutPetTip: layoutPetTip,
