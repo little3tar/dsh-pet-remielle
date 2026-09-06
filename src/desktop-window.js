@@ -193,6 +193,13 @@ export class DesktopWindow {
       },
     })
     this.child = child
+    let exitNotified = false
+    const notifyExit = () => {
+      if (exitNotified) return
+      exitNotified = true
+      if (this.child === child) this.child = undefined
+      this.onExit?.()
+    }
     const forward = (stream, dest) => {
       if (!stream || typeof stream.on !== 'function' || !dest || typeof dest.write !== 'function') return
       stream.on('data', (chunk) => {
@@ -205,11 +212,10 @@ export class DesktopWindow {
     forward(child.stderr, process.stderr)
     child.once('error', (error) => {
       this.logger.error?.(`dsh-pet-remielle: pet window failed to start: ${error.message}`)
-      this.child = undefined
+      notifyExit()
     })
     child.once('exit', () => {
-      if (this.child === child) this.child = undefined
-      this.onExit?.()
+      notifyExit()
     })
     return child
   }

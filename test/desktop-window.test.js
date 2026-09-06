@@ -144,6 +144,31 @@ test('DesktopWindow start is idempotent while running and fires onExit', () => {
   assert.equal(exited, 1)
 })
 
+test('DesktopWindow reports asynchronous spawn failures through onExit once', () => {
+  let exited = 0
+  let childRef
+  const window = new DesktopWindow({
+    url: 'http://127.0.0.1:1/x',
+    backend: { kind: 'electron', command: 'E:/missing/electron.exe', args: [] },
+    onExit: () => { exited += 1 },
+    logger: { error() {} },
+    spawnImpl: () => {
+      const child = new EventEmitter()
+      child.exitCode = null
+      child.killed = false
+      child.kill = () => { child.killed = true }
+      childRef = child
+      return child
+    },
+  })
+  window.start()
+  childRef.emit('error', new Error('ENOENT'))
+  assert.equal(exited, 1)
+  childRef.emit('exit', 1)
+  assert.equal(window.running, false)
+  assert.equal(exited, 1)
+})
+
 // ---------- findRoot ----------
 
 test('findRoot walks up and finds the marker', () => {
