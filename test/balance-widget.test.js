@@ -76,6 +76,16 @@ test('fmt never renders an unknown balance as zero', () => {
   // （state.todayUsage / shown 初值都是 null，动画中间值都是数字），故不在此断言。
 })
 
+test('refresh() forces a fetch outside the 60s poll', async () => {
+  const { api, requests, flush } = load({ fetchImpl: async () => ({ json: async () => balanceBody(8) }) })
+  api.showBalance()
+  await flush()
+  const before = requests.length
+  api.refresh()
+  await flush()
+  assert.equal(requests.length, before + 1, 'refresh() 应立即再拉一次，而不是等轮询')
+})
+
 test('showStatus and showBalance emit different frame kinds', async () => {
   const { api, frames, flush } = load({ fetchImpl: async () => ({ json: async () => balanceBody(30) }) })
   api.init('ledger')

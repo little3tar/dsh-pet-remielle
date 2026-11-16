@@ -697,6 +697,39 @@ function credentialsService() {
   }
 }
 
+/**
+ * 账号授权记录（登录 / 登出）或登录会话失效时，余额气泡不必等下一轮 60s 轮询。
+ * 令牌徽标由设置页自己订阅 `credentials/reference-updated`，不经这里转发。
+ */
+function refreshBalanceWidget() {
+  try {
+    if (typeof window !== 'undefined' && window.__petBalance && typeof window.__petBalance.refresh === 'function') {
+      window.__petBalance.refresh()
+    }
+  } catch (e) { /* 控件未挂载时忽略 */ }
+}
+
+/** 订阅账号相关的转发事件；宿主没有 remote 服务时返回 undefined（旧宿主降级为纯轮询）。 */
+function subscribeAccountRefresh(ctx) {
+  // 先走 ctx.get：未声明 inject 的服务直接点属性在 cordis 里会抛错。
+  var remote = null
+  try {
+    if (ctx && typeof ctx.get === 'function') remote = ctx.get('remote')
+    if ((!remote || typeof remote.$on !== 'function') && ctx && ctx.remote) remote = ctx.remote
+  } catch (e) { remote = null }
+  if (!remote || typeof remote.$on !== 'function') return undefined
+  var disposers = []
+  var track = function (off) { if (typeof off === 'function') disposers.push(off) }
+  track(remote.$on('credentials/record-updated', refreshBalanceWidget))
+  track(remote.$on('deepseek-account/session-expired', refreshBalanceWidget))
+  track(remote.$on('deepseek-account/model-sign-in-required', refreshBalanceWidget))
+  return function () {
+    while (disposers.length) {
+      try { disposers.pop()() } catch (e) { /* 解绑失败不阻塞重载 */ }
+    }
+  }
+}
+
 function PetsSection(props) {
   var embedded = props && props.embedded === true
   var tabState = React.useState('appearance')
@@ -3591,6 +3624,12 @@ function apply(ctx) {
 
   registerSettingsSlots(ctx)
   mountPet(ctx)
+  // 订阅挂到 effect 上，插件重载/停用时一并解绑。
+  if (typeof ctx.effect === 'function') {
+    ctx.effect(function () { return subscribeAccountRefresh(ctx) }, 'dsh-pet-remielle: account refresh')
+  } else {
+    subscribeAccountRefresh(ctx)
+  }
 }
 
 module.exports = {

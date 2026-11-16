@@ -9,6 +9,7 @@
 - 提问气泡只保留短文案（「有个问题想问你一下」），问题首句进悬停浮层（「提问：…，点一下跳过去看看呢」；已在当前会话时改为「就在这儿呢」）；timed 提问在前台等待结束后仍可回答时，经 `userQuestions` 投影继续显示等待，不再静默消失。
 - **平台令牌改存 DSH 凭据中心**：设置页令牌输入改成状态徽标 + 显式「保存 / 清除」，写入 `DEEPSEEK_PLATFORM_TOKEN`，不再随输入把明文写进插件配置；插件启动时把旧配置里的值一次性迁移进凭据中心并清空配置（凭据服务不可用、只读或写入失败时保持原样）。用量接口读取顺序改为「凭据中心 → 旧配置」。
 - `engines.node` 对齐 DSH 0.2.2（`>=24.9`），客户端声明 `@deepseek-ai/dsh-api-remotes` 依赖以使用 `ctx.remote.credentials`。
+- 订阅宿主转发的 `credentials/record-updated`、`deepseek-account/session-expired`、`deepseek-account/model-sign-in-required`：登录账号切换/登出或会话失效时立即刷新余额气泡，不必等下一轮 60s 轮询；宿主没有 remote 服务时保持原轮询。
 
 ### Fixes
 - 设置页「桌面悬浮」新增**桌面运行时**区块：分别显示 Electron 运行时缓存（`%LOCALAPPDATA%\dsh-pet-remielle\electron\v<版本>-<platform>-<arch>`）与窗口数据目录（`%APPDATA%\dsh-pet-remielle`）的路径、占用空间与文件数，并可单独清理；桌面悬浮窗正在运行时拒绝清理运行时缓存与窗口数据，避免删掉正在使用的 `electron.exe` 和 Chromium profile。

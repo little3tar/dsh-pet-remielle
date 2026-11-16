@@ -196,6 +196,10 @@
       mode = 'status'
       emit({ kind: 'status' })
     },
+    /** 外部事件（账号过期等）触发时立即拉一次，不必等下一轮 60s 轮询。 */
+    refresh: function () {
+      refresh(true)
+    },
     subscribe: function (cb) {
       listeners.push(cb)
       return function () {

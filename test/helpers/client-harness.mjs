@@ -261,12 +261,26 @@ export function createHarness(initialCurrent = 'other', autoSelect = true, snaps
       subscribe(listener) { panelListeners.add(listener); return () => panelListeners.delete(listener) },
     },
   }
+  // 官方 remote 事件的最小桩：记录订阅名，emitting 时按名回调，供插件刷新逻辑断言。
+  const remoteSubs = []
+  const remote = {
+    $on(name, cb) {
+      const entry = { name, cb }
+      remoteSubs.push(entry)
+      return () => {
+        const i = remoteSubs.indexOf(entry)
+        if (i !== -1) remoteSubs.splice(i, 1)
+      }
+    },
+  }
   const makeCtx = () => ({
     slots,
     sessions,
+    remote,
     get(name) {
       if (modernNavigation && name === 'uiWorkspace') return uiWorkspace
       if (name === 'layout') return withLayout ? layout : undefined
+      if (name === 'remote') return remote
       return undefined
     },
     effect: (callback) => {
@@ -318,7 +332,7 @@ export function createHarness(initialCurrent = 'other', autoSelect = true, snaps
     focused = next
     dispatchWindowEvent(next ? 'focus' : 'blur')
   }
-  return { allowClicks, applyAgain: () => moduleExports.apply(makeCtx()), roots: () => body.children.filter((child) => child.attrs && 'data-rm2-pet-root' in child.attrs && !child.removed).length, beacons, card, click, dispatchDocumentEvent, dispatchWindowEvent, dispose: () => { for (const cleanup of cleanups.splice(0).reverse()) cleanup() }, elements, fetches, navigator: navigatorStub, opened, panel: approvalPanel, otherPanel: otherApprovalPanel, select, send, setApprovalDom: (next) => { if (Array.isArray(next.scopedRoots)) scopedRoots = next.scopedRoots; if (Array.isArray(next.loosePanels)) loosePanels = next.loosePanels }, setFocus, setPanelActive, setVisibility, styleWrites, flushTitleTimers, window }
+  return { allowClicks, applyAgain: () => moduleExports.apply(makeCtx()), emitRemote: (name, ...args) => { for (const sub of [...remoteSubs]) if (sub.name === name) sub.cb(...args) }, remoteSubs, roots: () => body.children.filter((child) => child.attrs && 'data-rm2-pet-root' in child.attrs && !child.removed).length, beacons, card, click, dispatchDocumentEvent, dispatchWindowEvent, dispose: () => { for (const cleanup of cleanups.splice(0).reverse()) cleanup() }, elements, fetches, navigator: navigatorStub, opened, panel: approvalPanel, otherPanel: otherApprovalPanel, select, send, setApprovalDom: (next) => { if (Array.isArray(next.scopedRoots)) scopedRoots = next.scopedRoots; if (Array.isArray(next.loosePanels)) loosePanels = next.loosePanels }, setFocus, setPanelActive, setVisibility, styleWrites, flushTitleTimers, window }
 }
 
 export const base = {
